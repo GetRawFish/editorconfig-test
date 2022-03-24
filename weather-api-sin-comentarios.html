@@ -83,6 +83,20 @@
           },
         },
         methods: {
+          getWeatherData(lat, lon) {
+            fetch(`${API_URL_WEATHER}${API_QUERY_LAT}${lat}&${API_QUERY_LON}${lon}&units=${this.units}&lang=sp&${API_KEY}`)
+              .then((response) => {
+                // Transforma la respuesta. En este caso lo convierte a JSON
+                return response.json();
+            })
+            .then((json) => {
+              this.wetherDataToShow.tempNow = json.main.temp;
+              this.wetherDataToShow.wind = json.wind.speed;
+              this.wetherDataToShow.hum = json.main.humidity;
+              this.wetherDataToShow.date = json.dt;
+              this.wetherDataToShow.state = json.weather[0].description;
+            });
+          },
           getGeolocationData() {
             fetch(`${API_URL_GEOLOCATION}${API_QUERY_CITY}${this.city}&${API_QUERY_LIMIT}${this.limit}&${API_KEY}`)
               .then((response) => {
@@ -97,20 +111,6 @@
                 this.getWeatherData(this.lat, this.lon);
               });
           },
-        getWeatherData(lat, lon) {
-          fetch(`${API_URL_WEATHER}${API_QUERY_LAT}${lat}&${API_QUERY_LON}${lon}&units=${this.units}&lang=sp&${API_KEY}`)
-            .then((response) => {
-              // Transforma la respuesta. En este caso lo convierte a JSON
-              return response.json();
-            })
-            .then((json) => {
-              this.wetherDataToShow.tempNow = json.main.temp;
-              this.wetherDataToShow.wind = json.wind.speed;
-              this.wetherDataToShow.hum = json.main.humidity;
-              this.wetherDataToShow.date = json.dt;
-              this.wetherDataToShow.state = json.weather[0].description;
-            });
-          }
         },
       }).mount("#weather");
     </script>
