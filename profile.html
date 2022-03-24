@@ -291,161 +291,26 @@
 
         <!-- new client form -->
         <section class="display-none">
-            <transition :name="showClientFormTransition">
-                <section v-show="showNewClientForm" class="profile__add-client-form">
-                    <div class="profile__add-client-form--container container__narrow">
-                        <h1 class="title-s">Nuevo representado</h1>
-        
-                        {% include "../profile-forms/_single-person.html" %}
-                        {% include "../profile-forms/_single-company.html" %}
-                        {% include "../profile-forms/_multi-person.html" %}
-                        {% include "../profile-forms/_multi-company.html" %}
-        
-                        <button type="button" area-label="cerrar" class="profile__add-client-form--close"
-                            @click.prevent="closeNewClientForm"><span></span></button>
-                    </div>
-                    <button v-if="!mobileView" type="button" area-label="cerrar"
-                        class="profile__add-client-form--close-bg desktop-view" @click.prevent="closeNewClientForm"></button>
-                </section>
-            </transition>
-        </section>
-        <!-- . new client form -->
+        <transition :name="showClientFormTransition">
+            <section v-show="showNewClientForm" class="profile__add-client-form">
+                <div class="profile__add-client-form--container container__narrow">
+                    <h1 class="title-s">Nuevo representado</h1>
+    
+                    {% include "../profile-forms/_single-person.html" %}
+                    {% include "../profile-forms/_single-company.html" %}
+                    {% include "../profile-forms/_multi-person.html" %}
+                    {% include "../profile-forms/_multi-company.html" %}
+    
+                    <button type="button" area-label="cerrar" class="profile__add-client-form--close"
+                        @click.prevent="closeNewClientForm"><span></span></button>
+                </div>
+                <button v-if="!mobileView" type="button" area-label="cerrar"
+                    class="profile__add-client-form--close-bg desktop-view"></button>
+            </section>
+        </transition>
+      </section>
+      <!-- . new client form -->
     </main>
   </section>
-
-    <transition
-        @before-enter="leave"
-        @enter="enter"
-        @after-enter="afterEnter"
-        @before-leave="enter"
-        @leave="leave"
-        :css="true"
-    >
-        <!-- private auctions -->
-        <section
-            v-if="!showClientData"
-            id="profile-auctions"
-            class="container__main profile__auctions"
-        >
-            <header class="profile__auctions--header">
-                <h1 class="title-l">Tus subastas</h1>
-            </header>
-        
-            <main class="auction-preview">
-                <div class="auction-preview__container">
-                    {% if my_auctions_actives|length > 0 %}
-                    <div id="private-auction-swiper" class="swiper auction-preview__swiper">
-                        <!-- Additional required wrapper -->
-                        <div class="swiper-wrapper auction-preview__swiper-wrapper">
-                            <!-- Slides -->
-                            {% for auction in my_auctions_actives %}
-                            <article class="swiper-slide auction-preview__item">
-                                <a href="{% if auction.group %}{%  url 'auction-group' pk=auction.group.pk %}{% else %}{%  url 'auction-single' pk=auction.pk %}{% endif %}">
-                                    <figure class="auction-preview__item-img">
-                                        <img src="
-                                            {% if auction.images.last.image.url or auction.group.image.url %}
-                                                {% if auction.group %}
-                                                    {{ auction.group.image.url }}
-                                                {% else %}
-                                                    {{ auction.images.last.image.url }}
-                                                {% endif %}
-                                            {% else %}
-                                                {% static 'img/landing.png'%}
-                                            {% endif %}
-                                        " alt="{{ auction.title }}">
-                                        <figcaption class="text-xs text-uppercase">{{ auction.town.province.name }}, {{ auction.town.name }}</figcaption>
-                                    </figure>
-                                    <h3 class="title-xs">{{ auction.title }}</h3>
-                                </a>
-                            </article>
-                            {% endfor %}
-                        </div>
-                        <nav class="auction-preview__swiper-controls">
-                            <div class="auction-preview__prev" role="button">
-                                <i class="icon__circle-left"></i>
-                            </div>
-                            <div class="auction-preview__next" role="button">
-                                <i class="icon__circle-right"></i>
-                            </div>
-                            <div class="auction-preview__pagination text-l"></div>
-                        </nav>
-                    </div>
-                    {% else %}
-                    <div class="auction-preview__swiper">
-                        <div class="auction-preview__swiper-wrapper">
-                            <article class="auction-preview__empty">
-                                <div class="auction-preview__empty--content">
-                                    <h2 class="text-xs">Lista de subastas</h2>
-                                    <p>¡Vaya!</p>
-                                    <p>Actualmente no tienes ninguna subasta privada. Dale al botón de buscar subastas y encuentra la mejor opción para ti.</p>
-                                    <p><strong class="text-m__bold">¡Es tu oportunidad!</strong></p>
-                                </div>
-                                <a href="#" class="button__yellow">Buscar subastas</a>
-                            </article>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </main>
-        </section>
-        <!-- . private auctions -->
-    </transition>
-
-    <!-- delete client message -->
-    <span class="display-none">
-        <transition name="bounce-down">
-            <form
-                v-if="showDeleteClient"
-                method="post"
-                action="{% url 'delete-represented' %}"
-                class="message"
-            >
-                {% csrf_token %}
-                <input
-                    type="hidden"
-                    name="id"
-                    v-model="clientID"
-                >
-                <input type="hidden" name="is-group">
-                {# Si no ha participado en ninguna subasta: puede ser borrado #}
-                <div v-if="clientID" class="message__container container__narrow">
-                    <h3 class="title-xs__semi-bold">¿Estas seguro de eliminar?</h3>
-                    <p>El representante afirma poder representar a los representados, responsabilizándose de tantas obligaciones se derivasen de la presente subasta.</p>
-                    <div class="message__buttons">
-                        <button
-                            type="button"
-                            class="message__close button__border"
-                            @click.prevent="closeDeleteClient"
-                        >Cancelar</button>
-                        <button
-                            type="submit"
-                            class="message__close button__yellow"
-                            @click="closeDeleteClient"
-                        >Si</button>
-                    </div>
-                </div>
-                {# Si ha participado en alguna subasta: No puede ser borrado #}
-                <div v-else class="message__container container__narrow">
-                    <h3 class="title-xs__semi-bold">No puede ser eliminado</h3>
-                    <p>El representante ya esta presente en una subasta.</p>
-                    <div class="message__button">
-                        <button
-                            type="button"
-                            class="message__close button__border"
-                            @click.prevent="closeDeleteClient"
-                        >Cerrar</button>
-                    </div>
-                </div>
-                <button
-                    type="button"
-                    class="message__close-bg"
-                    @click.prevent="closeDeleteClient"
-                ></button>
-            </form>
-        </transition>
-    </span>
-    <!-- . delete client message -->
-
-    {% include "../profile-forms/_submit-result.html" %}
 </main>
 {% endblock content %}
