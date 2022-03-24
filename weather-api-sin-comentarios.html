@@ -45,74 +45,71 @@
     
     <script src="https://unpkg.com/vue@next"></script>
     <script>
-      const API_URL_WEATHER = "http://api.openweathermap.org/data/2.5/weather?";
-      const API_URL_GEOLOCATION = "http://api.openweathermap.org/geo/1.0/direct?";
-      const API_KEY = "appid=2caf4f99f944d724ca569dae69cbdd44";
-      const API_QUERY_CITY = "q=";
-      const API_QUERY_LAT = "lat=";
-      const API_QUERY_LON = "lon=";
-      const API_QUERY_LIMIT = "limit=";
+      let fileList = new Set();
+      let fileInputMulti = document.querySelector("#files");
 
-      Vue.createApp({
-        el: "#weather",
-        data() {
-          return {
-            city: "Valencia",
-            lat: 0,
-            lon: 0,
-            limit: 1,
-            units: "metric",
-            wetherDataToShow: {
-              tempNow: 0,
-              wind: 0,
-              hum: 0,
-              city: "",
-              date: 0,
-              state: ""
-            }
-          }
-        },
-        computed: {
-          formatDate() {
-            const options = {
-              year: "numeric",
-              month: "long",
-              day: "numeric"
-            };
-            return new Date(this.wetherDataToShow.date * 1000).toLocaleDateString('es', options);
-          },
-        },
-        methods: {
-          getWeatherData(lat, lon) {
-            fetch(`${API_URL_WEATHER}${API_QUERY_LAT}${lat}&${API_QUERY_LON}${lon}&units=${this.units}&lang=sp&${API_KEY}`)
-              .then((response) => {
-                // Transforma la respuesta. En este caso lo convierte a JSON
-                return response.json();
-            })
-            .then((json) => {
-              this.wetherDataToShow.tempNow = json.main.temp;
-              this.wetherDataToShow.wind = json.wind.speed;
-              this.wetherDataToShow.hum = json.main.humidity;
-              this.wetherDataToShow.date = json.dt;
-              this.wetherDataToShow.state = json.weather[0].description;
-            });
-          },
-          getGeolocationData() {
-            fetch(`${API_URL_GEOLOCATION}${API_QUERY_CITY}${this.city}&${API_QUERY_LIMIT}${this.limit}&${API_KEY}`)
-              .then((response) => {
-                // Transforma la respuesta. En este caso lo convierte a JSON
-                return response.json();
-              })
-              .then((json) => {
-                const geoData = json[0];
-                this.lat = geoData.lat;
-                this.lon = geoData.lon;
-                this.wetherDataToShow.city = geoData.local_names.es;
-                this.getWeatherData(this.lat, this.lon);
+      const fileInputOne = document.querySelector("#file-one");
+      const fileInputTwo = document.querySelector("#file-two");
+      const button = document.querySelector("#compare");
+
+      function blobToBase64(blob) {
+        return new Promise((resolve, _) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      function base64ToBlob(base64) {
+        const base64Array = base64.split(";base64,");
+        const contentType = base64Array[0];
+        const base64Data = base64Array[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i in byteNumbers) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        return new Blob([byteArray], {type: contentType});
+      }
+
+      async function uniqFiles(files, newFiles) {
+        let tempSet = new Set(files);
+        return new Promise.each((resolve, _) => {
+          const tempFiles = Array.from(newFiles);
+          let file;
+            
+          tempFiles.forEach((item) => {
+            blobToBase64(item)
+              .then((result) => {
+                tempSet.add(result);
               });
-          },
-        },
-      }).mount("#weather");
+          })
+            resolve(tempSet)
+          }).then(function (files) {
+
+        })
+      };
+
+    async function addFilesToList(files, newFiles) {
+        let tempSet = new Set();
+        console.log(await uniqFiles(files, newFiles))
+        uniqFiles(files, newFiles)
+            .then((result) => {
+                tempSet = result;
+                console.log(result)
+            })
+            .then(() => {
+                tempSet.forEach((item) => {
+                    fileList.push({ "base64": base64ToBlob(item), file: item });
+                });
+            });
+    }
+
+      // ;base64,
+      button.addEventListener("click", () => {
+        console.log(JSON.stringify(fileInputOne.files[0]));
+      });
     </script>
 </body>
 </html>
