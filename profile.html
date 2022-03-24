@@ -2,331 +2,316 @@
 {% load static i18n %}
 {% block content %}
 <main id="profile" class="d-top-margin__main m-top-margin__main profile">
-    <section class="container__narrow profile__data">
-        <aside v-if="!mobileView" class="profile__aside">
-            <nav>
-                <button
-                    class="button__light-grey-hover button__content-grid"
-                    :disabled="!showClientData"
-                    @click.prevent="closeShowClientData"
-                >
-                    <i class="icon__my-data"></i>
-                    <span>Ver tus datos y subastas</span>
-                </button>
-                <hr>
-                <button
-                    class="button__light-grey-hover button__content-grid"
-                    :disabled="showClientData"
-                    @click.prevent="openShowClientData"
-                >
-                    <i class="icon__clients"></i>
-                    <span>Ver tus usuarios representados</span>
-                </button>
-            </nav>
-        </aside>
+  <section class="container__narrow profile__data">
+    <aside class="profile__aside">
+      <nav>
+        <button class="button__light-grey-hover button__content-grid">
+          <i class="icon__my-data"></i>
+          <span>Ver tus datos y subastas</span>
+        </button>
+        <hr>
+        <button class="button__light-grey-hover button__content-grid">
+          <i class="icon__clients"></i>
+          <span>Ver tus usuarios representados</span>
+        </button>
+      </nav>
+    </aside>
 
-        <main>
-            <transition
-                @before-enter="leave"
-                @enter="enter"
-                @after-enter="afterEnter"
-                @before-leave="enter"
-                @leave="leave"
-                :css="true"
+    <main>
+    <transition>
+            <!-- user info summary -->
+            <section
+                v-if="!showClientData"
+                id="user-info"
+                class="profile__resume-wrapper"
             >
-                <!-- user info summary -->
-                <section
-                    v-if="!showClientData"
-                    id="user-info"
-                    class="profile__resume-wrapper"
-                >
-                    <span class="profile__resume">
-                        <h1 id="td-page-name" class="title-s">Tu cuenta</h1>
-                        <ul class="profile__resume--data">
-                            <li>
-                                <h2 class="text-grey text-s">Nombre</h2>
-                                <p id="td-name" class="text-m__semi-bold">{{ user.profile.first_name }}</p>
-                            </li>
-                            <li>
-                                <h2 class="text-grey text-s">Apellidos</h2>
-                                <p id="td-surnames" class="text-m__semi-bold">{{ user.profile.last_name }}</p>
-                            </li>
-                            <li>
-                                <h2 class="text-grey text-s">NIF/DNI/NIE</h2>
-                                <p id="td-dni" class="text-m__semi-bold">{{ user.profile.nif }}</p>
-                            </li>
-                            <li>
-                                <h2 class="text-grey text-s">Teléfono</h2>
-                                <p id="td-phone" class="text-m__semi-bold">{{ user.profile.phone }}</p>
-                            </li>
-                            <li class="profile__resume--address">
-                                <h2 class="text-grey text-s">Dirección</h2>
-                                <p id="td-address" class="text-m__semi-bold">{{ user.profile.address }}</p>
-                            </li>
-                            <li class="profile__resume--email">
-                                <h2 class="text-grey text-s">Email</h2>
-                                <p id="td-email" class="text-m__semi-bold">{{ user.profile.email }}</p>
-                            </li>
-                        </ul>
-                    </span>
-                </section>
-                <!-- . user info summary -->
-            </transition>
-
-            <span v-if="mobileView" class="mobile-view profile__clients--header-button-wrapper">
-                <button class="profile__clients--header-button" @click.prevent="toggleShowClientData">
-                    <h1 class="title-s">Usuarios Representados</h1>
-                    <i class="icon__expand" :class="{'expand-open': showClientData}"></i>
-                </button>
-            </span>
-
-            <transition
-                @before-enter="leave"
-                @enter="enter"
-                @after-enter="afterEnter"
-                @before-leave="enter"
-                @leave="leave"
-                :css="true"
-            >
-                <!-- user's client list -->
-                <section v-if="showClientData" class="profile__clients display-none">
-                    <header v-if="!mobileView" class="profile__clients--header desktop-view">
-                        <h1 class="title-s">Usuarios Representados</h1>
-                        <button class="profile__clients--add" @click.prevent="toggleShowAddClientTypes">
-                            <span>Agregar</span>
-                            <i class="icon__expand" :class="{'expand-open': showAddClientTypes}"></i>
-                        </button>
-                    </header>
-                
-                    <!-- new client types -->
-                    <span class="display-none">
-                        <transition
-                            @before-enter="beforeEnterAddClient"
-                            @enter="enterAddClient"
-                            @after-enter="afterEnterAddClient"
-                            @before-leave="beforeLeaveAddClient"
-                            @leave="leaveAddClient"
-                            :css="true"
-                        >
-                            <div
-                                v-if="showAddClientTypes"
-                                id="add-client"
-                                class="profile__add-new-client"
-                            >
-                                <fieldset ref="clientTypeContainer" class="profile__add-new-client--options">
-                                    <div class="profile__add-new-client--option">
-                                        <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.person)">Persona física</button>
-                                    </div>
-                                    <div class="profile__add-new-client--option">
-                                        <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.company)">Empresa</button>
-                                    </div>
-                                    <div class="profile__add-new-client--option">
-                                        <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.multi)">Compra con varios intervinientes</button>
-                                        <button
-                                            v-if="!mobileView"
-                                            class="profile__add-new-client--option-info"
-                                            @mouseover.prevent="openInfo('multi')"
-                                            @mouseout.prevent="closeInfo('multi')"
-                                        ><i class="icon__info"></i></button>
-                                        <button
-                                            v-else class="profile__add-new-client--option-info"
-                                            :class="{'info-open' : showInfo.has('multi')}"
-                                            @click.prevent="toggleInfo('multi')"
-                                        ><i class="icon__info"></i></button>
-                                        <transition
-                                            @before-enter="beforeEnterInfo"
-                                            @enter="enterInfo"
-                                            @leave="leaveInfo"
-                                            :css="true"
-                                        >
-                                            <button
-                                                v-show="showInfo.has('multi')"
-                                                class="profile__add-new-client--option-details"
-                                                @click.prevent="openNewClientForm(newClientTypes.multi)"
-                                            >
-                                                <span class="text-s">Conjunto de personas físicas con diferentes porcentajes de puja</span>
-                                            </button>
-                                        </transition>
-                                    </div>
-                                    <div class="profile__add-new-client--option">
-                                        <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.group)">Postura conjunta de personas jurídicas</button>
-                                        <button
-                                            v-if="!mobileView"
-                                            class="profile__add-new-client--option-info"
-                                            @mouseover.prevent="openInfo('group')"
-                                            @mouseout.prevent="closeInfo('group')"
-                                        ><i class="icon__info"></i></button>
-                                        <button
-                                            v-else
-                                            class="profile__add-new-client--option-info"
-                                            :class="{'info-open' : showInfo.has('group')}"
-                                            @click.prevent="toggleInfo('group')"
-                                        ><i class="icon__info"></i></button>
-                                        <transition
-                                            @before-enter="beforeEnterInfo"
-                                            @enter="enterInfo"
-                                            @leave="leaveInfo"
-                                            :css="true"
-                                        >
-                                            <button
-                                                v-show="showInfo.has('group')"
-                                                class="profile__add-new-client--option-details"
-                                                @click.prevent="openNewClientForm(newClientTypes.group)"
-                                            >
-                                                <p class="text-s">Conjunto de personas jurídicas con diferentes porcentajes de puja</p>
-                                            </button>
-                                        </transition>
-                                    </div>
-                                </fieldset>
-                                <div v-if="mobileView" class="profile__add-new-client--close">
-                                    <button
-                                        aria-label="close"
-                                        class="button-close"
-                                        @click.prevent="closeShowAddClientTypes"
-                                    ></button>
-                                </div>
-                            </div>
-                        </transition>
-                    </span>
-                    <!-- . new client types -->
-                
-                    <main class="profile__clients--content-wrapper">
-                        {% if representeds|length > 0 or representeds_group|length > 0 %}
-                        <!-- client list -->
-                        <div id="client-info" class="profile__clients--content">
-                            {% if representeds|length > 0 %}
-                            <h1 class="text-m__semi-bold">Postores individuales</h1>
-                            {# Single: Person or Company #}
-                            {% for represented in representeds %}
-                            {% if not represented.group %}
-                            <article class="profile__client">
-                                <header class="profile__client--header">
-                                    <div>
-                                        <h2 class="text-grey text-s">Tipo representado</h2>
-                                        <p class="text-m__semi-bold">{{ represented.represented_type_format }}</p>
-                                    </div>
-                                </header>
-                                <div class="profile__client--content">
-                                    <ul class="profile__client--data">
-                                        <li>
-                                            {% if represented.represented_type == "P" %}
-                                            <h2 class="text-grey text-s">Postor</h2>
-                                            {% else %}
-                                            <h2 class="text-grey text-s">Postor principal</h2>
-                                            {% endif %}
-                                            <p class="text-m__semi-bold">{{ represented.full_name }}</p>
-                                        </li>
-                                        <li>
-                                            {% if represented.represented_type == "P" %}
-                                            <h2 class="text-grey text-s">NIF/DNI/NIE</h2>
-                                            {% else %}
-                                            <h2 class="text-grey text-s">CIF</h2>
-                                            {% endif %}
-                                            <p class="text-m__semi-bold">{{ represented.nif }}</p>
-                                        </li>
-                                        <li class="profile__client--data-phone">
-                                            <h2 class="text-grey text-s">Teléfono contacto</h2>
-                                            <p class="text-m__semi-bold">{{ represented.phone_number }}</p>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <!-- change id at function parameters -->
-                                <button class="profile__client--delete" @click.prevent="openDeleteClient({% if represented.is_present_in_auction %}undefined{% else %}{{ represented.id }}{% endif %})"></button>
-                            </article>
-                            {% endif %}
-                            {% endfor %}
-                            {% endif %}
-                            {# End Single: Person or Company #}
-            
-                            {% if representeds_group|length > 0 %}
-                            <h1 class="text-m__semi-bold">Grupos de postores</h1>
-                            {# Multiple or groups #}
-                            {% for group in representeds_group %}
-                            <article class="profile__client">
-                                <header class="profile__client--header">
-                                    <div>
-                                        <h2 class="text-grey text-s">Tipo representado</h2>
-                                        <p class="text-m__semi-bold">{{ group.represented_type_format }}</p>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-grey text-s">Grupo</h2>
-                                        <p class="text-m__semi-bold">{{ group.name }}</p>
-                                    </div>
-                                </header>
-                                <div class="profile__client--content">
-                                    {% for sub_represented in group.all_representeds reversed %}
-                                    <ul class="profile__client--data">
-                                        <li>
-                                            <h2 class="text-grey text-s">Postor {{ forloop.counter }}</h2>
-                                            <p class="text-m__semi-bold">{{ sub_represented.full_name }}</p>
-                                        </li>
-                                        <li>
-                                            {% if sub_represented.represented_type == "P" %}
-                                            <h2 class="text-grey text-s">NIF/DNI/NIE</h2>
-                                            {% else %}
-                                            <h2 class="text-grey text-s">CIF</h2>
-                                            {% endif %}
-                                            <p class="text-m__semi-bold">{{ sub_represented.nif }}</p>
-                                        </li>
-                                        <li>
-                                            <h2 class="text-grey text-s">Porcentaje</h2>
-                                            <p class="text-m__semi-bold">{{ sub_represented.percentage }}%</p>
-                                        </li>
-                                        <li class="profile__client--data-phone">
-                                            <h2 class="text-grey text-s">Teléfono contacto</h2>
-                                            <p class="text-m__semi-bold">{{ sub_represented.phone_number }}</p>
-                                        </li>
-                                    </ul>
-                                    {% endfor %}
-                                </div>
-                                <!-- change id at function parameters -->
-                                <button class="profile__client--delete" @click.prevent="openDeleteClient({% if represented.is_present_in_auction %}undefined{% else %}{{ represented.id }}{% endif %})"></button>
-                            </article>
-                            {% endfor %}
-                            {% endif %}
-                            {# End Multiple or groups #}
-                        </div>
-                        {% endif %}
-                        <!-- . client list -->
-                    </main>
-                </section>
-                <!-- . user's client list -->
-            </transition>
-
-            <transition name="add-clients">
-                <footer v-if="mobileView && showClientData" class="profile__clients--footer mobile-view">
-                    <span>
-                        <button class="profile__clients--add text-m__extra-bold" @click.prevent="openShowAddClientTypes">
-                            <span>Agregar</span>
-                            <i class="icon__right"></i>
-                        </button>
-                    </span>
-                </footer>
-            </transition>
-
-            <!-- new client form -->
-            <section class="display-none">
-                <transition :name="showClientFormTransition">
-                    <section v-show="showNewClientForm" class="profile__add-client-form">
-                        <div class="profile__add-client-form--container container__narrow">
-                            <h1 class="title-s">Nuevo representado</h1>
-            
-                            {% include "../profile-forms/_single-person.html" %}
-                            {% include "../profile-forms/_single-company.html" %}
-                            {% include "../profile-forms/_multi-person.html" %}
-                            {% include "../profile-forms/_multi-company.html" %}
-            
-                            <button type="button" area-label="cerrar" class="profile__add-client-form--close"
-                                @click.prevent="closeNewClientForm"><span></span></button>
-                        </div>
-                        <button v-if="!mobileView" type="button" area-label="cerrar"
-                            class="profile__add-client-form--close-bg desktop-view" @click.prevent="closeNewClientForm"></button>
-                    </section>
-                </transition>
+                <span class="profile__resume">
+                    <h1 id="td-page-name" class="title-s">Tu cuenta</h1>
+                    <ul class="profile__resume--data">
+                        <li>
+                            <h2 class="text-grey text-s">Nombre</h2>
+                            <p id="td-name" class="text-m__semi-bold">{{ user.profile.first_name }}</p>
+                        </li>
+                        <li>
+                            <h2 class="text-grey text-s">Apellidos</h2>
+                            <p id="td-surnames" class="text-m__semi-bold">{{ user.profile.last_name }}</p>
+                        </li>
+                        <li>
+                            <h2 class="text-grey text-s">NIF/DNI/NIE</h2>
+                            <p id="td-dni" class="text-m__semi-bold">{{ user.profile.nif }}</p>
+                        </li>
+                        <li>
+                            <h2 class="text-grey text-s">Teléfono</h2>
+                            <p id="td-phone" class="text-m__semi-bold">{{ user.profile.phone }}</p>
+                        </li>
+                        <li class="profile__resume--address">
+                            <h2 class="text-grey text-s">Dirección</h2>
+                            <p id="td-address" class="text-m__semi-bold">{{ user.profile.address }}</p>
+                        </li>
+                        <li class="profile__resume--email">
+                            <h2 class="text-grey text-s">Email</h2>
+                            <p id="td-email" class="text-m__semi-bold">{{ user.profile.email }}</p>
+                        </li>
+                    </ul>
+                </span>
             </section>
-            <!-- . new client form -->
-        </main>
-    </section>
+            <!-- . user info summary -->
+        </transition>
+
+        <span v-if="mobileView" class="mobile-view profile__clients--header-button-wrapper">
+            <button class="profile__clients--header-button" @click.prevent="toggleShowClientData">
+                <h1 class="title-s">Usuarios Representados</h1>
+                <i class="icon__expand" :class="{'expand-open': showClientData}"></i>
+            </button>
+        </span>
+
+        <transition
+            @before-enter="leave"
+            @enter="enter"
+            @after-enter="afterEnter"
+            @before-leave="enter"
+            @leave="leave"
+            :css="true"
+        >
+            <!-- user's client list -->
+            <section v-if="showClientData" class="profile__clients display-none">
+                <header v-if="!mobileView" class="profile__clients--header desktop-view">
+                    <h1 class="title-s">Usuarios Representados</h1>
+                    <button class="profile__clients--add" @click.prevent="toggleShowAddClientTypes">
+                        <span>Agregar</span>
+                        <i class="icon__expand" :class="{'expand-open': showAddClientTypes}"></i>
+                    </button>
+                </header>
+            
+                <!-- new client types -->
+                <span class="display-none">
+                    <transition
+                        @before-enter="beforeEnterAddClient"
+                        @enter="enterAddClient"
+                        @after-enter="afterEnterAddClient"
+                        @before-leave="beforeLeaveAddClient"
+                        @leave="leaveAddClient"
+                        :css="true"
+                    >
+                        <div
+                            v-if="showAddClientTypes"
+                            id="add-client"
+                            class="profile__add-new-client"
+                        >
+                            <fieldset ref="clientTypeContainer" class="profile__add-new-client--options">
+                                <div class="profile__add-new-client--option">
+                                    <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.person)">Persona física</button>
+                                </div>
+                                <div class="profile__add-new-client--option">
+                                    <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.company)">Empresa</button>
+                                </div>
+                                <div class="profile__add-new-client--option">
+                                    <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.multi)">Compra con varios intervinientes</button>
+                                    <button
+                                        v-if="!mobileView"
+                                        class="profile__add-new-client--option-info"
+                                        @mouseover.prevent="openInfo('multi')"
+                                        @mouseout.prevent="closeInfo('multi')"
+                                    ><i class="icon__info"></i></button>
+                                    <button
+                                        v-else class="profile__add-new-client--option-info"
+                                        :class="{'info-open' : showInfo.has('multi')}"
+                                        @click.prevent="toggleInfo('multi')"
+                                    ><i class="icon__info"></i></button>
+                                    <transition
+                                        @before-enter="beforeEnterInfo"
+                                        @enter="enterInfo"
+                                        @leave="leaveInfo"
+                                        :css="true"
+                                    >
+                                        <button
+                                            v-show="showInfo.has('multi')"
+                                            class="profile__add-new-client--option-details"
+                                            @click.prevent="openNewClientForm(newClientTypes.multi)"
+                                        >
+                                            <span class="text-s">Conjunto de personas físicas con diferentes porcentajes de puja</span>
+                                        </button>
+                                    </transition>
+                                </div>
+                                <div class="profile__add-new-client--option">
+                                    <button class="profile__add-new-client--option-button" @click.prevent="openNewClientForm(newClientTypes.group)">Postura conjunta de personas jurídicas</button>
+                                    <button
+                                        v-if="!mobileView"
+                                        class="profile__add-new-client--option-info"
+                                        @mouseover.prevent="openInfo('group')"
+                                        @mouseout.prevent="closeInfo('group')"
+                                    ><i class="icon__info"></i></button>
+                                    <button
+                                        v-else
+                                        class="profile__add-new-client--option-info"
+                                        :class="{'info-open' : showInfo.has('group')}"
+                                        @click.prevent="toggleInfo('group')"
+                                    ><i class="icon__info"></i></button>
+                                    <transition
+                                        @before-enter="beforeEnterInfo"
+                                        @enter="enterInfo"
+                                        @leave="leaveInfo"
+                                        :css="true"
+                                    >
+                                        <button
+                                            v-show="showInfo.has('group')"
+                                            class="profile__add-new-client--option-details"
+                                            @click.prevent="openNewClientForm(newClientTypes.group)"
+                                        >
+                                            <p class="text-s">Conjunto de personas jurídicas con diferentes porcentajes de puja</p>
+                                        </button>
+                                    </transition>
+                                </div>
+                            </fieldset>
+                            <div v-if="mobileView" class="profile__add-new-client--close">
+                                <button
+                                    aria-label="close"
+                                    class="button-close"
+                                    @click.prevent="closeShowAddClientTypes"
+                                ></button>
+                            </div>
+                        </div>
+                    </transition>
+                </span>
+                <!-- . new client types -->
+            
+                <main class="profile__clients--content-wrapper">
+                    {% if representeds|length > 0 or representeds_group|length > 0 %}
+                    <!-- client list -->
+                    <div id="client-info" class="profile__clients--content">
+                        {% if representeds|length > 0 %}
+                        <h1 class="text-m__semi-bold">Postores individuales</h1>
+                        {# Single: Person or Company #}
+                        {% for represented in representeds %}
+                        {% if not represented.group %}
+                        <article class="profile__client">
+                            <header class="profile__client--header">
+                                <div>
+                                    <h2 class="text-grey text-s">Tipo representado</h2>
+                                    <p class="text-m__semi-bold">{{ represented.represented_type_format }}</p>
+                                </div>
+                            </header>
+                            <div class="profile__client--content">
+                                <ul class="profile__client--data">
+                                    <li>
+                                        {% if represented.represented_type == "P" %}
+                                        <h2 class="text-grey text-s">Postor</h2>
+                                        {% else %}
+                                        <h2 class="text-grey text-s">Postor principal</h2>
+                                        {% endif %}
+                                        <p class="text-m__semi-bold">{{ represented.full_name }}</p>
+                                    </li>
+                                    <li>
+                                        {% if represented.represented_type == "P" %}
+                                        <h2 class="text-grey text-s">NIF/DNI/NIE</h2>
+                                        {% else %}
+                                        <h2 class="text-grey text-s">CIF</h2>
+                                        {% endif %}
+                                        <p class="text-m__semi-bold">{{ represented.nif }}</p>
+                                    </li>
+                                    <li class="profile__client--data-phone">
+                                        <h2 class="text-grey text-s">Teléfono contacto</h2>
+                                        <p class="text-m__semi-bold">{{ represented.phone_number }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- change id at function parameters -->
+                            <button class="profile__client--delete" @click.prevent="openDeleteClient({% if represented.is_present_in_auction %}undefined{% else %}{{ represented.id }}{% endif %})"></button>
+                        </article>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+                        {# End Single: Person or Company #}
+        
+                        {% if representeds_group|length > 0 %}
+                        <h1 class="text-m__semi-bold">Grupos de postores</h1>
+                        {# Multiple or groups #}
+                        {% for group in representeds_group %}
+                        <article class="profile__client">
+                            <header class="profile__client--header">
+                                <div>
+                                    <h2 class="text-grey text-s">Tipo representado</h2>
+                                    <p class="text-m__semi-bold">{{ group.represented_type_format }}</p>
+                                </div>
+                                <div>
+                                    <h2 class="text-grey text-s">Grupo</h2>
+                                    <p class="text-m__semi-bold">{{ group.name }}</p>
+                                </div>
+                            </header>
+                            <div class="profile__client--content">
+                                {% for sub_represented in group.all_representeds reversed %}
+                                <ul class="profile__client--data">
+                                    <li>
+                                        <h2 class="text-grey text-s">Postor {{ forloop.counter }}</h2>
+                                        <p class="text-m__semi-bold">{{ sub_represented.full_name }}</p>
+                                    </li>
+                                    <li>
+                                        {% if sub_represented.represented_type == "P" %}
+                                        <h2 class="text-grey text-s">NIF/DNI/NIE</h2>
+                                        {% else %}
+                                        <h2 class="text-grey text-s">CIF</h2>
+                                        {% endif %}
+                                        <p class="text-m__semi-bold">{{ sub_represented.nif }}</p>
+                                    </li>
+                                    <li>
+                                        <h2 class="text-grey text-s">Porcentaje</h2>
+                                        <p class="text-m__semi-bold">{{ sub_represented.percentage }}%</p>
+                                    </li>
+                                    <li class="profile__client--data-phone">
+                                        <h2 class="text-grey text-s">Teléfono contacto</h2>
+                                        <p class="text-m__semi-bold">{{ sub_represented.phone_number }}</p>
+                                    </li>
+                                </ul>
+                                {% endfor %}
+                            </div>
+                            <!-- change id at function parameters -->
+                            <button class="profile__client--delete" @click.prevent="openDeleteClient({% if represented.is_present_in_auction %}undefined{% else %}{{ represented.id }}{% endif %})"></button>
+                        </article>
+                        {% endfor %}
+                        {% endif %}
+                        {# End Multiple or groups #}
+                    </div>
+                    {% endif %}
+                    <!-- . client list -->
+                </main>
+            </section>
+            <!-- . user's client list -->
+        </transition>
+
+        <transition name="add-clients">
+            <footer v-if="mobileView && showClientData" class="profile__clients--footer mobile-view">
+                <span>
+                    <button class="profile__clients--add text-m__extra-bold" @click.prevent="openShowAddClientTypes">
+                        <span>Agregar</span>
+                        <i class="icon__right"></i>
+                    </button>
+                </span>
+            </footer>
+        </transition>
+
+        <!-- new client form -->
+        <section class="display-none">
+            <transition :name="showClientFormTransition">
+                <section v-show="showNewClientForm" class="profile__add-client-form">
+                    <div class="profile__add-client-form--container container__narrow">
+                        <h1 class="title-s">Nuevo representado</h1>
+        
+                        {% include "../profile-forms/_single-person.html" %}
+                        {% include "../profile-forms/_single-company.html" %}
+                        {% include "../profile-forms/_multi-person.html" %}
+                        {% include "../profile-forms/_multi-company.html" %}
+        
+                        <button type="button" area-label="cerrar" class="profile__add-client-form--close"
+                            @click.prevent="closeNewClientForm"><span></span></button>
+                    </div>
+                    <button v-if="!mobileView" type="button" area-label="cerrar"
+                        class="profile__add-client-form--close-bg desktop-view" @click.prevent="closeNewClientForm"></button>
+                </section>
+            </transition>
+        </section>
+        <!-- . new client form -->
+    </main>
+  </section>
 
     <transition
         @before-enter="leave"
