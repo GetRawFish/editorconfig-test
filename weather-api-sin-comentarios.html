@@ -45,77 +45,74 @@
     
     <script src="https://unpkg.com/vue@next"></script>
     <script>
-        const API_URL_WEATHER = "http://api.openweathermap.org/data/2.5/weather?";
-        const API_URL_GEOLOCATION = "http://api.openweathermap.org/geo/1.0/direct?";
-        const API_KEY = "appid=2caf4f99f944d724ca569dae69cbdd44";
-        const API_QUERY_CITY = "q=";
-        const API_QUERY_LAT = "lat=";
-        const API_QUERY_LON = "lon=";
-        const API_QUERY_LIMIT = "limit=";
+      const API_URL_WEATHER = "http://api.openweathermap.org/data/2.5/weather?";
+      const API_URL_GEOLOCATION = "http://api.openweathermap.org/geo/1.0/direct?";
+      const API_KEY = "appid=2caf4f99f944d724ca569dae69cbdd44";
+      const API_QUERY_CITY = "q=";
+      const API_QUERY_LAT = "lat=";
+      const API_QUERY_LON = "lon=";
+      const API_QUERY_LIMIT = "limit=";
 
-        Vue.createApp({
-            el: "#weather",
-            data() {
-                return {
-                    city: "Valencia",
-                    lat: 0,
-                    lon: 0,
-                    limit: 1,
-                    units: "metric",
-                    wetherDataToShow: {
-                        tempNow: 0,
-                        wind: 0,
-                        hum: 0,
-                        city: "",
-                        date: 0,
-                        state: ""
-                    }
-                }
-            },
-            computed: {
-                formatDate() {
-                    const options = {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                    }
-                    return new Date(this.wetherDataToShow.date * 1000).toLocaleDateString('es-ES', options);
-                },
-                condicional() {
-                    return true ? "hola" : "adios";
-                }
-            },
-            methods: {
-                getGeolocationData() {
-                    fetch(`${API_URL_GEOLOCATION}${API_QUERY_CITY}${this.city}&${API_QUERY_LIMIT}${this.limit}&${API_KEY}`)
-                        .then((response) => {
-                            // Transforma la respuesta. En este caso lo convierte a JSON
-                            return response.json();
-                        })
-                        .then((json) => {
-                            const geoData = json[0];
-                            this.lat = geoData.lat;
-                            this.lon = geoData.lon;
-                            this.wetherDataToShow.city = geoData.local_names.es;
-                            this.getWeatherData(this.lat, this.lon);
-                        });
-                },
-                getWeatherData(lat, lon) {
-                    fetch(`${API_URL_WEATHER}${API_QUERY_LAT}${lat}&${API_QUERY_LON}${lon}&units=${this.units}&lang=sp&${API_KEY}`)
-                        .then((response) => {
-                            // Transforma la respuesta. En este caso lo convierte a JSON
-                            return response.json();
-                        })
-                        .then((json) => {
-                            this.wetherDataToShow.tempNow = json.main.temp;
-                            this.wetherDataToShow.wind = json.wind.speed;
-                            this.wetherDataToShow.hum = json.main.humidity;
-                            this.wetherDataToShow.date = json.dt;
-                            this.wetherDataToShow.state = json.weather[0].description;
-                        });
-                }
-            },
-        }).mount("#weather");
+      Vue.createApp({
+        el: "#weather",
+        data() {
+          return {
+            city: "Valencia",
+            lat: 0,
+            lon: 0,
+            limit: 1,
+            units: "metric",
+            wetherDataToShow: {
+              tempNow: 0,
+              wind: 0,
+              hum: 0,
+              city: "",
+              date: 0,
+              state: ""
+            }
+          }
+        },
+        computed: {
+          formatDate() {
+            const options = {
+              year: "numeric",
+              month: "long",
+              day: "numeric"
+            };
+            return new Date(this.wetherDataToShow.date * 1000).toLocaleDateString('es', options);
+          },
+        },
+        methods: {
+          getGeolocationData() {
+            fetch(`${API_URL_GEOLOCATION}${API_QUERY_CITY}${this.city}&${API_QUERY_LIMIT}${this.limit}&${API_KEY}`)
+              .then((response) => {
+                // Transforma la respuesta. En este caso lo convierte a JSON
+                return response.json();
+              })
+              .then((json) => {
+                const geoData = json[0];
+                this.lat = geoData.lat;
+                this.lon = geoData.lon;
+                this.wetherDataToShow.city = geoData.local_names.es;
+                this.getWeatherData(this.lat, this.lon);
+              });
+          },
+        getWeatherData(lat, lon) {
+          fetch(`${API_URL_WEATHER}${API_QUERY_LAT}${lat}&${API_QUERY_LON}${lon}&units=${this.units}&lang=sp&${API_KEY}`)
+            .then((response) => {
+              // Transforma la respuesta. En este caso lo convierte a JSON
+              return response.json();
+            })
+            .then((json) => {
+              this.wetherDataToShow.tempNow = json.main.temp;
+              this.wetherDataToShow.wind = json.wind.speed;
+              this.wetherDataToShow.hum = json.main.humidity;
+              this.wetherDataToShow.date = json.dt;
+              this.wetherDataToShow.state = json.weather[0].description;
+            });
+          }
+        },
+      }).mount("#weather");
     </script>
 </body>
 </html>
